@@ -6,7 +6,8 @@ global LIN_CONFIRM_PATH := "C:\pic\confirm.PNG" ;輸入完密碼後系統跳出�
 global LIN_CONFIRM_CHAR_PATH := "C:\pic\confirm2.PNG" ;選擇好角色確認
 global LIN_CHANGE_ROLE_PATH := "C:\pic\change_role.PNG" ; 點重新登入
 global LIN_EXIT_PATH := "C:\pic\exit.PNG" ; 點離開
-global LIN_ACCOUNT_PATH := "C:\roles_account"
+; global LIN_ACCOUNT_PATH := "C:\roles_account"
+global LIN_ACCOUNT_PATH := "C:\execute_accounts"
 
 ;選角色的坐標
 global ROLE_1_POS = [103, 188]
