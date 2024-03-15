@@ -1,3 +1,7 @@
+#Include %A_ScriptDir%\lib\LogManager.ahk
+#Include %A_ScriptDir%\lib\ReadFile.ahk
+#Include %A_ScriptDir%\lib\ClickPicManager.ahk
+
 global LIN_PROG_PATH := "C:\Program Files\Gamania\悠風(Lineage 3.5C)\Login.exe" ;主程式檔案
 global LIN_START_PATH := "C:\pic\start.PNG" ;登入器檢查是否更新
 global LIN_SERVER_PATH := "C:\pic\server.PNG" ; 選擇伺服器
@@ -178,7 +182,6 @@ Return
 
 #MaxThreadsPerHotkey 1
 
-
 ChangeEquip(X, Y){
     CoordMode,Mouse,"Screen"
     Loop 5 {
@@ -187,100 +190,4 @@ ChangeEquip(X, Y){
     }
     MouseClick,left,%X%,%Y%,1
     Sleep 100
-}
-
-;模擬滑鼠點擊圖片
-ClickPicture(ImageFilePath,ClickCount:=1,Speed:=0,Return:=true,ShowError:=true){
-    pos:=GetPicturePosition(ImageFilePath)
-    if %pos%{
-        posX:=pos[1]
-        posY:=pos[2]
-        ClickPosition(posX,posY,ClickCount,Speed,,Return)
-        return [posX,posY]
-    }else{
-        if %ShowError% {
-            ErrorMessage := "Can not find the picture " ImageFilePath
-            WriteLog(Error ErrorMessage, "ERROR" )
-            MSGBOX %ErrorMessage%
-        }
-        return false
-    }
-}
-
-;模擬滑鼠點擊
-ClickPosition(posX,posY,ClickCount:=1,Speed:=0,CoordMode:="Screen",Return:=true){
-    ;若使用相對模式
-    if (CoordMode="Relative"){
-        CoordMode,Mouse,Screen
-        MouseGetPos, posX_i, posY_i ;儲存原來的滑鼠位置
-        ;根據點擊次數是否為零來使用MouseClick或MouseMove
-        if %ClickCount%{
-            MouseClick,,%posX%,%posY%,%ClickCount%,%Speed%,,R ;點擊相對位置
-        }else{
-            MouseMove, %posX%, %posY%,%Speed%
-        }
-    ;若使用其他模式
-    }else{
-        CoordMode,Mouse,%CoordMode%
-        MouseGetPos, posX_i, posY_i ;儲存原來的滑鼠位置
-        ;根據點擊次數是否為零來使用MouseClick或MouseMove
-        if %ClickCount%{
-            MouseClick,,%posX%,%posY%,%ClickCount%,%Speed%
-        }else{
-            MouseMove, %posX%, %posY%,%Speed%
-        }
-    }
-    ;是否點擊後返回
-    if %Return%{
-        MouseMove, %posX_i%, %posY_i%,%Speed%
-    }
-    return
-}
-
-;獲取圖片的位置
-GetPicturePosition(ImageFilePath){
-    gui,add,picture,hwndmypic,%ImageFilePath%
-    controlgetpos,,,width,height,,ahk_id %mypic%
-    CoordMode Pixel
-    ImageSearch, FoundX, FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight,%ImageFilePath%
-    CoordMode Mouse
-    if %FoundX%{
-        return [FoundX+width/2,FoundY+height/2]
-    } else {
-        return FoundX
-    }
-}
-
-WriteLog(message, type:= "INFO", folderPath := "")
-{
-    ; 在執行ahk的目錄下創建logs
-    if(folderPath = "")
-        folderPath := A_ScriptDir . "\logs"
-    NOW := A_YYYY "-" A_MM  "-"  A_DD " " A_Hour  ":"  A_Min  ":" A_Sec
-    TODAY := A_YYYY A_MM A_DD
-    FileName := TODAY . ".log" ;以日期命名
-    FullPath := folderPath . "\" . FileName
-    ; 檢查檔案是否存在
-    If !FileExist(FullPath) 
-        FileCreateDir, %folderPath%
-    FileAppend, %NOW% [%type%] => %message%`r, %folderPath%\%FileName%
-    ; MsgBox, 已在%FullPath% 寫入 `r => %NOW% [%type%]%message%   
-}
-
-ReadAccounts(FolderPath := "D:\ahk\roles_account")
-{
-  accounts := []
-  Loop, Files, % FolderPath "\*.txt"
-  {
-      filepath := A_LoopFileFullPath
-      
-      ; 讀取 txt 檔案的第一行和第二行
-      FileReadLine, account, % filepath, 1
-      FileReadLine, password, % filepath, 2
-      
-      ; 將帳號和密碼存入二維陣列
-      WriteLog("Read Account_" A_Index ": " account)
-      accounts.push([account, password])
-  }
-  return accounts
 }
