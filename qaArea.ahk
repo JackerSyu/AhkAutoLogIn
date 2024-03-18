@@ -1,8 +1,11 @@
-#Include %A_ScriptDir%\lib\LogManager.ahk
-#Include %A_ScriptDir%\lib\ReadFile.ahk
+#Include %A_ScriptDir%\ahk_lib\LogManager.ahk
+#Include %A_ScriptDir%\ahk_lib\ReadFile.ahk
 
 !Numpad0::
-IN_PROG_PATH := LoadConfig("LIN_SERVER_PATH", A_ScriptDir "\config.txt")
-MsgBox, %IN_PROG_PATH%
+LIN_PROG_PATH := LoadConfig("LIN_PROG_PATH", A_ScriptDir "\config.txt") ;主程式檔案
+LIN_START_PATH := LoadConfig("LIN_START_PATH", A_ScriptDir "\config.txt") ;登入器檢查是否更新
+
+
+MsgBox, %LIN_PROG_PATH%`n%LIN_START_PATH%
 Return
 

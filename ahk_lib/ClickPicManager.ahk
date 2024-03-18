@@ -1,21 +1,29 @@
-#Include %A_ScriptDir%\lib\LogManager.ahk
+#Include %A_ScriptDir%\ahk_lib\LogManager.ahk
 
 ;模擬滑鼠點擊圖片
 ClickPicture(ImageFilePath,ClickCount:=1,Speed:=0,Return:=true,ShowError:=true){
-    pos:=GetPicturePosition(ImageFilePath)
-    if %pos%{
-        posX:=pos[1]
-        posY:=pos[2]
-        ClickPosition(posX,posY,ClickCount,Speed,,Return)
-        return [posX,posY]
-    }else{
-        if %ShowError% {
-            ErrorMessage := "Can not find the picture " ImageFilePath
-            WriteLog(Error ErrorMessage, "ERROR" )
-            MSGBOX %ErrorMessage%
+    cnt := 0
+    retry := 3
+    Loop %retry%
+    {
+         pos:=GetPicturePosition(ImageFilePath)
+        if %pos%{
+            posX:=pos[1]
+            posY:=pos[2]    
+            ClickPosition(posX,posY,ClickCount,Speed,,Return)
+            return [posX,posY]
+        }else{
+            if %ShowError% {
+                ErrorMessage := "Can not find the picture " ImageFilePath
+                WriteLog(Error ErrorMessage, "ERROR" )
+            }
+            WriteLog("Retry:" A_Index)
+            sleep 1000
         }
-        return false
     }
+    WriteLog("Retry failed!")
+    MSGBOX %ErrorMessage%
+    return false  
 }
 
 ;模擬滑鼠點擊

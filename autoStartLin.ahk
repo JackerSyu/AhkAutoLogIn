@@ -1,17 +1,17 @@
-#Include %A_ScriptDir%\lib\LogManager.ahk
-#Include %A_ScriptDir%\lib\ReadFile.ahk
-#Include %A_ScriptDir%\lib\ClickPicManager.ahk
+#Include %A_ScriptDir%\ahk_lib\LogManager.ahk
+#Include %A_ScriptDir%\ahk_lib\ReadFile.ahk
+#Include %A_ScriptDir%\ahk_lib\ClickPicManager.ahk
 
-global LIN_PROG_PATH := "C:\Program Files\Gamania\悠風(Lineage 3.5C)\Login.exe" ;主程式檔案
-global LIN_START_PATH := "C:\pic\start.PNG" ;登入器檢查是否更新
-global LIN_SERVER_PATH := "C:\pic\server.PNG" ; 選擇伺服器
-global LIN_LOGIN_PATH := "C:\pic\login.PNG" ;輸入完密碼登入
-global LIN_CONFIRM_PATH := "C:\pic\confirm.PNG" ;輸入完密碼後系統跳出的確認
-global LIN_CONFIRM_CHAR_PATH := "C:\pic\confirm2.PNG" ;選擇好角色確認
-global LIN_CHANGE_ROLE_PATH := "C:\pic\change_role.PNG" ; 點重新登入
-global LIN_EXIT_PATH := "C:\pic\exit.PNG" ; 點離開
-; global LIN_ACCOUNT_PATH := "C:\roles_account"
-global LIN_ACCOUNT_PATH := "C:\execute_accounts"
+
+global LIN_PROG_PATH := LoadConfig("LIN_PROG_PATH", A_ScriptDir "\config.txt") ;主程式檔案
+global LIN_START_PATH := LoadConfig("LIN_START_PATH", A_ScriptDir "\config.txt") ;登入器檢查是否更新
+global LIN_SERVER_PATH := LoadConfig("LIN_SERVER_PATH", A_ScriptDir "\config.txt") ; 選擇伺服器
+global LIN_LOGIN_PATH := LoadConfig("LIN_LOGIN_PATH", A_ScriptDir "\config.txt") ;輸入完密碼登入
+global LIN_CONFIRM_PATH := LoadConfig("LIN_CONFIRM_PATH", A_ScriptDir "\config.txt") ;輸入完密碼後系統跳出的確認
+global LIN_CONFIRM_CHAR_PATH := LoadConfig("LIN_CONFIRM_CHAR_PATH", A_ScriptDir "\config.txt") ;選擇好角色確認
+global LIN_CHANGE_ROLE_PATH := LoadConfig("LIN_CHANGE_ROLE_PATH", A_ScriptDir "\config.txt") ;點重新登入
+global LIN_EXIT_PATH := LoadConfig("LIN_EXIT_PATH", A_ScriptDir "\config.txt") ;點離開
+global LIN_ACCOUNT_PATH := LoadConfig("LIN_ACCOUNT_PATH", A_ScriptDir "\config.txt") ;執行的帳號
 
 ;選角色的坐標
 global ROLE_1_POS = [103, 188]
@@ -55,7 +55,7 @@ StartAccount(isOpenBag){
         accountIndex++
         curAccount := accounts[accountIndex][1]
         curPassword := accounts[accountIndex][2]
-        WriteLog("Current Account: " account )
+        WriteLog("Current Account: " curAccount )
         Run %LIN_PROG_PATH%
         sleep 1000
         send {Left}
@@ -131,63 +131,12 @@ StartAccount(isOpenBag){
                     MouseClick,left,%POS_X%,%POS_Y%,1
                 }
             }
+            WriteLog("完成角色: " currentRole)
             sleep 2000
+            
         }
+        WriteLog("完成帳號: " curAccount)
         sleep 5000
     }
-}
-
-
-#MaxThreadsPerHotkey 2
-
-$!f1::
-
-PressKey := ! PressKey
-
-Loop
-{
-    If ! PressKey
-        Break
-    Send {f3 Down}
-    Sleep 500
-    Send {f3 Up}
-    Sleep 500
-    
-}
-Return
-
-
-
-
-
-$!f2::
-
-PressKey := ! PressKey
-
-Loop
-{
-    If ! PressKey
-        Break
-    Send {f5 Down}
-    Sleep 500
-    Send {f5 Up}
-    Sleep 1000
-    Send {LButton Down}
-    Sleep 500
-    Send {LButton Up}
-    Sleep 10000
-    
-}
-Return
-
-#MaxThreadsPerHotkey 1
-
-ChangeEquip(X, Y){
-    CoordMode,Mouse,"Screen"
-    Loop 5 {
-        MouseClick,left,%X%,%Y%,1
- Sleep 100
-    }
-    MouseClick,left,%X%,%Y%,1
-    Sleep 100
+    WriteLog("程序結束")
 }

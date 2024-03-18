@@ -1,2 +1,2 @@
-LIN_PROG_PATH := "C:\Program Files\Gamania\悠風(Lineage 3.5C)\Login.exe"
-LIN_SERVER_PATH := "C:\pic\server.PNG"
+LIN_START_PATH := C:\pic\start.PNG
+LIN_PROG_PATH := C:\Program Files\Gamania\悠風(Lineage 3.5C)\Login.exe

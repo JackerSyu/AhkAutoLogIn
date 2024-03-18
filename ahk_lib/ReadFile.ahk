@@ -1,4 +1,4 @@
-#Include %A_ScriptDir%\lib\LogManager.ahk
+#Include %A_ScriptDir%\ahk_lib\LogManager.ahk
 
 ReadAccounts(FolderPath := "D:\ahk\roles_account")
 {
@@ -41,7 +41,7 @@ LoadConfig(key, folder_path)
             value := Trim(value, "`n`r`t ")
             
             if value ~= "[A-Z]:\\" ; 檢查是否為路徑
-                value := value . "\" ; 添加尾部反斜線
+                ; value := value . "\" ; 添加尾部反斜線
 
            %key% := value
             return value

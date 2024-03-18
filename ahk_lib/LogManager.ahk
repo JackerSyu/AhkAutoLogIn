@@ -10,6 +10,6 @@ WriteLog(message, type:= "INFO", folderPath := "")
     ; 檢查檔案是否存在
     If !FileExist(FullPath) 
         FileCreateDir, %folderPath%
-    FileAppend, %NOW% [%type%] => %message%`r, %folderPath%\%FileName%
+    FileAppend, %NOW% [%type%] => %message%`n, %folderPath%\%FileName%
     ; MsgBox, 已在%FullPath% 寫入 `r => %NOW% [%type%]%message%   
 }
