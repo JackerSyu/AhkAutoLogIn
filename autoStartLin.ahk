@@ -3,26 +3,27 @@
 #Include %A_ScriptDir%\ahk_lib\ClickPicManager.ahk
 
 
-global LIN_PROG_PATH := LoadConfig("LIN_PROG_PATH", A_ScriptDir "\config.txt") ;主程式檔案
-global LIN_START_PATH := LoadConfig("LIN_START_PATH", A_ScriptDir "\config.txt") ;登入器檢查是否更新
+global LIN_PROG_PATH := LoadConfig("LIN_PROG_PATH", A_ScriptDir "\config.txt") ; 主程式檔案
+global LIN_START_PATH := LoadConfig("LIN_START_PATH", A_ScriptDir "\config.txt") ; 登入器檢查是否更新
 global LIN_SERVER_PATH := LoadConfig("LIN_SERVER_PATH", A_ScriptDir "\config.txt") ; 選擇伺服器
-global LIN_LOGIN_PATH := LoadConfig("LIN_LOGIN_PATH", A_ScriptDir "\config.txt") ;輸入完密碼登入
-global LIN_CONFIRM_PATH := LoadConfig("LIN_CONFIRM_PATH", A_ScriptDir "\config.txt") ;輸入完密碼後系統跳出的確認
-global LIN_CONFIRM_CHAR_PATH := LoadConfig("LIN_CONFIRM_CHAR_PATH", A_ScriptDir "\config.txt") ;選擇好角色確認
-global LIN_CHANGE_ROLE_PATH := LoadConfig("LIN_CHANGE_ROLE_PATH", A_ScriptDir "\config.txt") ;點重新登入
-global LIN_EXIT_PATH := LoadConfig("LIN_EXIT_PATH", A_ScriptDir "\config.txt") ;點離開
-global LIN_ACCOUNT_PATH := LoadConfig("LIN_ACCOUNT_PATH", A_ScriptDir "\config.txt") ;執行的帳號
+global LIN_LOGIN_PATH := LoadConfig("LIN_LOGIN_PATH", A_ScriptDir "\config.txt") ; 輸入完密碼登入
+global LIN_CONFIRM_PATH := LoadConfig("LIN_CONFIRM_PATH", A_ScriptDir "\config.txt") ; 輸入完密碼後系統跳出的確認
+global LIN_CONFIRM_CHAR_PATH := LoadConfig("LIN_CONFIRM_CHAR_PATH", A_ScriptDir "\config.txt") ; 選擇好角色確認
+global LIN_CHANGE_ROLE_PATH := LoadConfig("LIN_CHANGE_ROLE_PATH", A_ScriptDir "\config.txt") ; 點重新登入
+global LIN_EXIT_PATH := LoadConfig("LIN_EXIT_PATH", A_ScriptDir "\config.txt") ; 點離開
+global LIN_ACCOUNT_PATH := LoadConfig("LIN_ACCOUNT_PATH", A_ScriptDir "\config.txt") ; 執行的帳號
+global LIN_BAG_PATH := LoadConfig("LIN_BAG_PATH", A_ScriptDir "\config.txt") ; 執行的帳號
 
-;選角色的坐標
+; 選角色的坐標
 global ROLE_1_POS = [103, 188]
 global ROLE_2_POS = [305, 188]
 global ROLE_3_POS = [495, 188]
 global ROLE_4_POS = [685, 188]
 
-;點擊重登畫面坐標
+; 點擊重登畫面坐標
 global EXIT_POS = [789, 584]
 
-;角色坐標陣列(之後切換多賬號可以當參數)
+; 角色坐標陣列(之後切換多賬號可以當參數)
 global ROLES_POS := [ROLE_1_POS, ROLE_2_POS, ROLE_3_POS, ROLE_4_POS]
 
 
@@ -55,6 +56,7 @@ StartAccount(isOpenBag){
         accountIndex++
         curAccount := accounts[accountIndex][1]
         curPassword := accounts[accountIndex][2]
+        complete := true
         WriteLog("Current Account: " curAccount )
         Run %LIN_PROG_PATH%
         sleep 1000
@@ -62,9 +64,9 @@ StartAccount(isOpenBag){
         sleep 1000
         send {enter}
         sleep 3000
-        if(!ClickPicture(LIN_START_PATH, 1, 1,true,true)) 
+        if(!ClickPicture(LIN_START_PATH, 1, 1,true,true)) ; cannot bypass
             Return
-        if(!ClickPicture(LIN_SERVER_PATH, 1, 1,true,true)) 
+        if(!ClickPicture(LIN_SERVER_PATH, 1, 1,true,true)) ; cannot bypass
             Return
         sleep 5000
         Send {Left} {Left} {Left} {Left} {Left} 
@@ -75,10 +77,10 @@ StartAccount(isOpenBag){
         sleep 1000
         Send %curPassword%
         sleep 1000
-        if(!ClickPicture(LIN_LOGIN_PATH, 1, 1,true,true)) 
+        if(!ClickPicture(LIN_LOGIN_PATH, 1, 1,true,true)) ; cannot bypass
             Return
         sleep 2000
-        if(!ClickPicture(LIN_CONFIRM_PATH, 1, 1,true,true)) 
+        if(!ClickPicture(LIN_CONFIRM_PATH, 1, 1,true,true)) ; cannot bypass
             Return
         sleep 2000
         ; 開始選角色流程
@@ -99,7 +101,7 @@ StartAccount(isOpenBag){
             sleep 1000
             MouseClick, left, %pos_x%, %pos_y%, 1
             sleep 1000
-            if(!ClickPicture(LIN_CONFIRM_CHAR_PATH, 1, 1,true,true))
+            if(!ClickPicture(LIN_CONFIRM_CHAR_PATH, 1, 1,true,true)) ; cannot bypass
                 Return
             sleep 2000
             if (currentRole = 1)
@@ -110,6 +112,11 @@ StartAccount(isOpenBag){
             if (openBagMode = true)
             {
                 sleep 2000
+                if(!ClickPicture(LIN_BAG_PATH, 1, 1, true, false)) ; can bypass
+                {
+                    WriteLog("Cannot find the bag:" curAccount currentRole, "INFO")
+                    complete := false
+                }   
                 ; 袋子放在F9, 如果要開寶箱可以自己新增多個熱鍵, 按多次一點
                 send {F9}
                 sleep 2000
@@ -131,7 +138,7 @@ StartAccount(isOpenBag){
                     MouseClick,left,%POS_X%,%POS_Y%,1
                 }
             }
-            WriteLog("完成角色: " currentRole)
+            WriteLog("finish role no: " currentRole)
             sleep 2000
             
         }

@@ -13,16 +13,16 @@ ClickPicture(ImageFilePath,ClickCount:=1,Speed:=0,Return:=true,ShowError:=true){
             ClickPosition(posX,posY,ClickCount,Speed,,Return)
             return [posX,posY]
         }else{
-            if %ShowError% {
-                ErrorMessage := "Can not find the picture " ImageFilePath
-                WriteLog(Error ErrorMessage, "ERROR" )
-            }
+            ErrorMessage := "Can not find the picture " ImageFilePath
+            WriteLog(Error ErrorMessage, "ERROR" )
             WriteLog("Retry:" A_Index)
             sleep 1000
         }
     }
     WriteLog("Retry failed!")
-    MSGBOX %ErrorMessage%
+    if %ShowError% {
+        MSGBOX %ErrorMessage%
+    }
     return false  
 }
 

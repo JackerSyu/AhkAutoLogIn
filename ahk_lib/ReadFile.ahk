@@ -18,7 +18,6 @@ ReadAccounts(FolderPath := "D:\ahk\roles_account")
   return accounts
 }
 
-
 LoadConfig(key, folder_path)
 {
     configFile := folder_path ; 替換為您的配置文件路徑
