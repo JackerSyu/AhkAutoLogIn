@@ -6,6 +6,7 @@ Include:
    - Input account info
    - Select role
    - Click certain picture
+   - Check bag is exist
    - Exit game 
    - Repeat...(Scan the role_accounts folder until end.)
 2. Sell equipments to vendor automatically in game.
