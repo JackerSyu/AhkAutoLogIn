@@ -56,7 +56,7 @@ StartAccount(isOpenBag){
         accountIndex++
         curAccount := accounts[accountIndex][1]
         curPassword := accounts[accountIndex][2]
-        complete := true
+        accountComplete := true
         WriteLog("Current Account: " curAccount )
         Run %LIN_PROG_PATH%
         sleep 1000
@@ -93,6 +93,7 @@ StartAccount(isOpenBag){
         Loop %totalRoles%, 
         {
             currentRole++
+            hasBag := true
             pos_x := ROLES_POS[currentRole][1]
             pos_y := ROLES_POS[currentRole][2]
             ; Send, "now: " %pos_x% %pos_y%
@@ -114,8 +115,9 @@ StartAccount(isOpenBag){
                 sleep 2000
                 if(!ClickPicture(LIN_BAG_PATH, 1, 1, true, false)) ; can bypass
                 {
-                    WriteLog("Cannot find the bag:" curAccount currentRole, "INFO")
-                    complete := false
+                    WriteLog("Cannot find the bag:" curAccount currentRole, "WARN")
+                    accountComplete := false
+                    hasBag := false
                 }   
                 ; 袋子放在F9, 如果要開寶箱可以自己新增多個熱鍵, 按多次一點
                 send {F9}
@@ -126,24 +128,25 @@ StartAccount(isOpenBag){
                 sleep 2000
                 if (currentRole < totalRoles)
                 {
-                    if(!ClickPicture(LIN_CHANGE_ROLE_PATH, 1, 1,true,true))
+                    if(!ClickPicture(LIN_CHANGE_ROLE_PATH, 1, 1,true,true)) ; cannot by pass
                         Return
                 }
                 else
                 {
                     ; 賬號結束
-                    if(!ClickPicture(LIN_EXIT_PATH, 1, 1,true,true))
+                    if(!ClickPicture(LIN_EXIT_PATH, 1, 1,true,true)) ; cannot bypass
                         Return
                     sleep 2000
                     MouseClick,left,%POS_X%,%POS_Y%,1
                 }
             }
-            WriteLog("finish role no: " currentRole)
+            WriteLog("Finish Role Number: " currentRole)
+            if(!hasBag)
+                WriteLog("Cannot find the bag: [" curAccount "]:" currentRole, "WARN")
             sleep 2000
-            
         }
-        WriteLog("完成帳號: " curAccount)
+        WriteLog("Account Process Success: " curAccount)
         sleep 5000
     }
-    WriteLog("程序結束")
+    WriteLog("Process End")
 }

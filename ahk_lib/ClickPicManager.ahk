@@ -19,7 +19,7 @@ ClickPicture(ImageFilePath,ClickCount:=1,Speed:=0,Return:=true,ShowError:=true){
             sleep 1000
         }
     }
-    WriteLog("Retry failed!")
+    WriteLog("Retry failed!", "WARN")
     if %ShowError% {
         MSGBOX %ErrorMessage%
     }
