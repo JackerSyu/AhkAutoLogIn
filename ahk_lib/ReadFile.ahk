@@ -18,6 +18,30 @@ ReadAccounts(FolderPath := "D:\ahk\roles_account")
   return accounts
 }
 
+
+
+
+
+ReadPic(PicPath)
+{
+    FileList := [] 
+
+    Loop, Files, % PicPath "\*.png"
+    {
+        fullFilePath := A_LoopFileFullPath  ; 获取文件的完整路径
+        FileList.Push(fullFilePath)  
+    }
+
+	; Loop, % FileList.length() 
+	; {
+	; 	file := FileList[A_Index]
+	;         MsgBox 文件名： %file%
+	; }
+
+    ; 如果您想要将数组作为结果返回，可以通过函数返回值来实现
+    Return FileList
+}
+
 LoadConfig(key, folder_path)
 {
     configFile := folder_path ; 替換為您的配置文件路徑

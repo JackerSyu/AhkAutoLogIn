@@ -43,6 +43,10 @@ Return
 StartAccount(true, true)
 Return
 
+!numpad7::
+StoreProcess()
+Return
+
 StartAccount(isOpenBag, isStoreMode){
     openBagMode := isOpenBag
     WriteLog("Open Bag Mode: " openBagMode )
@@ -129,7 +133,13 @@ StartAccount(isOpenBag, isStoreMode){
                 sleep 2000
                 ; add store process
                 if (isStoreMode)
+                {
                     StoreProcess()
+                    Send, {esc} {esc} {esc}
+                    WriteLog("Finish Store")
+                    sleep, 500
+                }
+                    
                 POS_X := EXIT_POS[1]
                 POS_Y := EXIT_POS[2]
                 MouseClick,left,%POS_X%,%POS_Y%,1
@@ -159,10 +169,10 @@ StartAccount(isOpenBag, isStoreMode){
     WriteLog("Process End")
 }
 
-
 StoreProcess()
 {
     ; talk to storeman
+    Send, {esc} {esc} {esc}
     WriteLog("click storeman")
     JierPos_X := 443
     JierPos_Y := 196
@@ -180,28 +190,29 @@ StoreProcess()
         send, {WheelDown}
     }
     ; click store
-    if(!ClickPicture(LIN_STORE_TEXT_PATH, 1, 1,true,true)) ; cannot bypass
+    sleep 500
+    if(!ClickPicture(LIN_STORE_TEXT_PATH, 1, 1,true,false)) ; cannot bypass
         Return
-    if(!ClickPicture(LIN_STORE_TEXT2_PATH, 1, 1,true,true)) ; cannot bypass
+    sleep 500
+    if(!ClickPicture(LIN_STORE_TEXT2_PATH, 1, 1,true,false)) ; cannot bypass
         Return
-    Images := ["C:\pic\equip1.PNG", "C:\pic\equip2.PNG", "C:\pic\equip3.PNG", "C:\pic\equip4.PNG", "C:\pic\equip5.PNG", "C:\pic\equip6.PNG"]
+    Images := ReadPic(LIN_STORE_ITEMS_PATH)
     scrollCount := 0
+    MouseClick,left,109,164,1
+    MouseMove, 109,164,1
+    sleep 500
     Loop {
-        found := false  ; 标记是否找到了图片
-        ; 遍历所有图像路径
+        found := false  
         for index, imagePath in Images {
             if (ClickPicture(imagePath, 1, 1, true, false)) {
-                ; 图像找到并点击成功
                 sleep, 200
-                send, {Ctrl Up} ; 释放 Ctrl 键
-                send, {9999}
-                found := true  ; 标记找到图片
-                WriteLog("found item:" imagePath)
+                send, {Ctrl Up} 
+                send, {1} {1} {1} {1} {1}
+                found := true  
             }
         }
-
         if (found = false) {
-            ; 图像未找到，滚动下移7次为一组，每组之间停顿1秒
+            
             Loop 7 {
                 send, {WheelDown}
                 scrollCount++
@@ -209,8 +220,6 @@ StoreProcess()
             }
 	    sleep, 100
         }
-	
-
         ; 如果滚动总数超过50次，则跳出循环
         if (scrollCount >= 50)
             break
@@ -223,3 +232,12 @@ StoreProcess()
         WriteLog("Save success")
     sleep 1000
 }
+
+!numpad0::
+Send, /bookmark \fY[其他] 袋子
+Return
+
+
+!numpad1::
+Send, /bookmark \fY[其他] 歐瑞
+Return
