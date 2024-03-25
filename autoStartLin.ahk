@@ -15,7 +15,8 @@ global LIN_ACCOUNT_PATH := LoadConfig("LIN_ACCOUNT_PATH", A_ScriptDir "\config.t
 global LIN_BAG_PATH := LoadConfig("LIN_BAG_PATH", A_ScriptDir "\config.txt") ; bag
 global LIN_STORE_ITEMS_PATH := LoadConfig("LIN_STORE_ITEMS_PATH", A_ScriptDir "\config.txt") ; sell 
 global LIN_STORE_TEXT_PATH := LoadConfig("LIN_STORE_TEXT_PATH", A_ScriptDir "\config.txt") ; click
-global LIN_STORE_SAVE_PATH := LoadConfig("LIN_STORE_SAVE_PATH", A_ScriptDir "\config.txt") ; save
+global LIN_STORE_TEXT2_PATH := LoadConfig("LIN_STORE_TEXT2_PATH", A_ScriptDir "\config.txt") ; click
+global LIN_STORE_CONFIRM_PATH := LoadConfig("LIN_STORE_CONFIRM_PATH", A_ScriptDir "\config.txt") ; save
 
 ; 選角色的坐標
 global ROLE_1_POS = [103, 188]
@@ -128,7 +129,7 @@ StartAccount(isOpenBag, isStoreMode){
                 sleep 2000
                 ; add store process
                 if (isStoreMode)
-                    storeProcess()
+                    StoreProcess()
                 POS_X := EXIT_POS[1]
                 POS_Y := EXIT_POS[2]
                 MouseClick,left,%POS_X%,%POS_Y%,1
@@ -159,18 +160,30 @@ StartAccount(isOpenBag, isStoreMode){
 }
 
 
-isStoreMode()
+StoreProcess()
 {
     ; talk to storeman
     WriteLog("click storeman")
-    MouseClick,left,%POS_X%,%POS_Y%,1
-    send, {WheelDown}
-    send, {WheelDown}
-    send, {WheelDown}
+    JierPos_X := 443
+    JierPos_Y := 196
+    ; move to storeman
+    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    sleep 500
+    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    sleep 500
+    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    
+    sleep 3000
+    MouseMove, 100, 200, 0 
+    Loop 7 
+    {
+        send, {WheelDown}
+    }
     ; click store
     if(!ClickPicture(LIN_STORE_TEXT_PATH, 1, 1,true,true)) ; cannot bypass
         Return
-
+    if(!ClickPicture(LIN_STORE_TEXT2_PATH, 1, 1,true,true)) ; cannot bypass
+        Return
     Images := ["C:\pic\equip1.PNG", "C:\pic\equip2.PNG", "C:\pic\equip3.PNG", "C:\pic\equip4.PNG", "C:\pic\equip5.PNG", "C:\pic\equip6.PNG"]
     scrollCount := 0
     Loop {
@@ -181,7 +194,7 @@ isStoreMode()
                 ; 图像找到并点击成功
                 sleep, 200
                 send, {Ctrl Up} ; 释放 Ctrl 键
-                send, {1}
+                send, {9999}
                 found := true  ; 标记找到图片
                 WriteLog("found item:" imagePath)
             }
@@ -204,7 +217,7 @@ isStoreMode()
     }
     sleep 1500
     ; save btn 
-    if(!ClickPicture(LIN_STORE_SAVE_PATH, 1, 1,true,true)) ; cannot bypass
+    if(!ClickPicture(LIN_STORE_CONFIRM_PATH, 1, 1,true,true)) ; cannot bypass
         Return
     Else
         WriteLog("Save success")
