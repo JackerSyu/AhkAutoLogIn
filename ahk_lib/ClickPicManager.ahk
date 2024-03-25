@@ -3,7 +3,7 @@
 ;模擬滑鼠點擊圖片
 ClickPicture(ImageFilePath,ClickCount:=1,Speed:=0,Return:=true,ShowError:=true){
     cnt := 0
-    retry := 3
+    retry := 1
     Loop %retry%
     {
          pos:=GetPicturePosition(ImageFilePath)
@@ -13,13 +13,13 @@ ClickPicture(ImageFilePath,ClickCount:=1,Speed:=0,Return:=true,ShowError:=true){
             ClickPosition(posX,posY,ClickCount,Speed,,Return)
             return [posX,posY]
         }else{
-            ErrorMessage := "Can not find the picture " ImageFilePath
-            WriteLog(Error ErrorMessage, "ERROR" )
-            WriteLog("Retry:" A_Index)
-            sleep 1000
+            if %ShowError% {
+                ErrorMessage := "Can not find the picture " ImageFilePath
+                WriteLog(Error ErrorMessage, "ERROR" )
+                WriteLog("Retry:" A_Index)
+            }
         }
     }
-    WriteLog("Retry failed!", "WARN")
     if %ShowError% {
         MSGBOX %ErrorMessage%
     }
