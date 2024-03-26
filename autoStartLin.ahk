@@ -220,8 +220,7 @@ StoreProcess()
             }
 	    sleep, 100
         }
-        ; 如果滚动总数超过50次，则跳出循环
-        if (scrollCount >= 50)
+        if (scrollCount >= 70)
             break
     }
     sleep 1500

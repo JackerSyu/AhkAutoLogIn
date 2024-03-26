@@ -28,23 +28,20 @@ ReadPic(PicPath)
 
     Loop, Files, % PicPath "\*.png"
     {
-        fullFilePath := A_LoopFileFullPath  ; 获取文件的完整路径
+        fullFilePath := A_LoopFileFullPath  
         FileList.Push(fullFilePath)  
     }
-
 	; Loop, % FileList.length() 
 	; {
 	; 	file := FileList[A_Index]
 	;         MsgBox 文件名： %file%
 	; }
-
-    ; 如果您想要将数组作为结果返回，可以通过函数返回值来实现
     Return FileList
 }
 
 LoadConfig(key, folder_path)
 {
-    configFile := folder_path ; 替換為您的配置文件路徑
+    configFile := folder_path 
 
     if !FileExist(configFile)
     {
@@ -54,7 +51,7 @@ LoadConfig(key, folder_path)
 
     FileRead, content, %configFile%
 
-    lines := StrSplit(content, "`r`n") ; 更換為適合您的行結束符
+    lines := StrSplit(content, "`r`n") 
 
     for index, line in lines
     {
@@ -64,7 +61,6 @@ LoadConfig(key, folder_path)
             value := Trim(value, "`n`r`t ")
             
             if value ~= "[A-Z]:\\" ; 檢查是否為路徑
-                ; value := value . "\" ; 添加尾部反斜線
 
            %key% := value
             return value
