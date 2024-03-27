@@ -163,7 +163,7 @@ StartAccount(isOpenBag, isStoreMode){
                 WriteLog("Finish Role Number: " currentRole)
                 if(!hasBag)
                 {
-                    DestFolder := %LIN_LACK_BAG_ACCOUNT_PATH% "\" %TODAY%
+                    DestFolder := LIN_LACK_BAG_ACCOUNT_PATH "\" TODAY
                     WriteLog("Cannot find the bag: [" curAccount "]:" currentRole " => Copy to " DestFolder, "WARN")
                     if (FileExist(curFilePath)) {
                         If !FileExist(DestFolder) 
@@ -181,7 +181,7 @@ StartAccount(isOpenBag, isStoreMode){
         
         if(openBagMode == true && accountComplete == true)
         {
-            DestFolder := %LIN_ACCOUNT_DONE_SUCCESS_PATH% "\" %TODAY%
+            DestFolder := LIN_ACCOUNT_DONE_SUCCESS_PATH "\" TODAY
             WriteLog("Account Process Success: " curAccount " => Move to " DestFolder)
             if (FileExist(curFilePath)) {
                 If !FileExist(DestFolder) 
@@ -269,4 +269,23 @@ Return
 
 !numpad1::
 Send, /bookmark \fY[其他] 歐瑞
+Return
+
+
+::vvolumeup::
+SendInput, {Volume_Up}
+Return
+
+::mmute::
+SendInput, {Volume_Mute}
+Return
+
+
+XButton1::
+Send, {F7}
+Return
+
+
+XButton2::
+Send, {F8}
 Return
