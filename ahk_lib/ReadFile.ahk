@@ -13,7 +13,7 @@ ReadAccounts(FolderPath := "D:\ahk\roles_account")
       
       ; 將帳號和密碼存入二維陣列
       WriteLog("Read Account_" A_Index ": " account)
-      accounts.push([account, password])
+      accounts.push([account, password, filepath])
   }
   return accounts
 }

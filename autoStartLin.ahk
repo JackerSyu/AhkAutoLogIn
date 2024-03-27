@@ -17,6 +17,8 @@ global LIN_STORE_ITEMS_PATH := LoadConfig("LIN_STORE_ITEMS_PATH", A_ScriptDir "\
 global LIN_STORE_TEXT_PATH := LoadConfig("LIN_STORE_TEXT_PATH", A_ScriptDir "\config.txt") ; click
 global LIN_STORE_TEXT2_PATH := LoadConfig("LIN_STORE_TEXT2_PATH", A_ScriptDir "\config.txt") ; click
 global LIN_STORE_CONFIRM_PATH := LoadConfig("LIN_STORE_CONFIRM_PATH", A_ScriptDir "\config.txt") ; save
+global LIN_LACK_BAG_ACCOUNT_PATH := LoadConfig("LIN_LACK_BAG_ACCOUNT_PATH", A_ScriptDir "\config.txt") ; need buy bag
+global LIN_ACCOUNT_DONE_SUCCESS_PATH := LoadConfig("LIN_ACCOUNT_DONE_SUCCESS_PATH", A_ScriptDir "\config.txt") ; success
 
 ; 選角色的坐標
 global ROLE_1_POS = [103, 188]
@@ -48,6 +50,7 @@ StoreProcess()
 Return
 
 StartAccount(isOpenBag, isStoreMode){
+    TODAY := A_YYYY A_MM A_DD
     openBagMode := isOpenBag
     WriteLog("Open Bag Mode: " openBagMode )
     WriteLog("Store Mode: " isStoreMode )
@@ -65,6 +68,7 @@ StartAccount(isOpenBag, isStoreMode){
         accountIndex++
         curAccount := accounts[accountIndex][1]
         curPassword := accounts[accountIndex][2]
+        curFilePath := accounts[accountIndex][3]
         accountComplete := true
         WriteLog("Current Account: " curAccount )
         Run %LIN_PROG_PATH%
@@ -119,12 +123,11 @@ StartAccount(isOpenBag, isStoreMode){
                 send {Home}
             }
             
-            if (openBagMode = true)
+            if (openBagMode == true)
             {
                 sleep 2000
                 if(!ClickPicture(LIN_BAG_PATH, 1, 1, true, false)) ; can bypass
                 {
-                    WriteLog("Cannot find the bag:" curAccount currentRole, "WARN")
                     accountComplete := false
                     hasBag := false
                 }   
@@ -157,14 +160,41 @@ StartAccount(isOpenBag, isStoreMode){
                     sleep 2000
                     MouseClick,left,%POS_X%,%POS_Y%,1
                 }
+                WriteLog("Finish Role Number: " currentRole)
+                if(!hasBag)
+                {
+                    DestFolder := %LIN_LACK_BAG_ACCOUNT_PATH% "\" %TODAY%
+                    WriteLog("Cannot find the bag: [" curAccount "]:" currentRole " => Copy to " DestFolder, "WARN")
+                    if (FileExist(curFilePath)) {
+                        If !FileExist(DestFolder) 
+                            FileCreateDir, %DestFolder%
+                        FileCopy, %curFilePath%, %DestFolder%
+                    }
+                    else
+                    {
+                        WriteLog("Cannot find the file: [" curFilePath "]:", "ERROR")
+                    }
+                }
             }
-            WriteLog("Finish Role Number: " currentRole)
-            if(!hasBag)
-                WriteLog("Cannot find the bag: [" curAccount "]:" currentRole, "WARN")
             sleep 2000
         }
-        WriteLog("Account Process Success: " curAccount)
+        
+        if(openBagMode == true && accountComplete == true)
+        {
+            DestFolder := %LIN_ACCOUNT_DONE_SUCCESS_PATH% "\" %TODAY%
+            WriteLog("Account Process Success: " curAccount " => Move to " DestFolder)
+            if (FileExist(curFilePath)) {
+                If !FileExist(DestFolder) 
+                    FileCreateDir, %DestFolder%
+                FileMove, %curFilePath%, %DestFolder%
+            }
+            else
+            {
+                WriteLog("Cannot find the file: [" curFilePath "]:", "ERROR")
+            }
+        }
         sleep 5000
+
     }
     WriteLog("Process End")
 }
