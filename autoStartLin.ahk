@@ -79,6 +79,7 @@ StartAccount(isOpenBag, isStoreMode){
         sleep 3000
         if(!ClickPicture(LIN_START_PATH, 1, 1,true,true)) ; cannot bypass
             Return
+        sleep 1000
         if(!ClickPicture(LIN_SERVER_PATH, 1, 1,true,true)) ; cannot bypass
             Return
         sleep 5000
