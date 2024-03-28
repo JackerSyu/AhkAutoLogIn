@@ -29,3 +29,11 @@ Include:
 6. Create a store folder in your pic folder (to store items)
 7. Create a role_account, new account info in txt (the first line = account, second line = pwd)
 <span style="font-size: 10px; color: gray">if you want to start store items process, you may need .spr(變身檔) to highlight the NPC(storeman) location </span>
+
+
+
+
+## Update History
+
+- 2024-03-27 Add features: Move to specific folder after finishing the process.
+- 2024-03-25 Add features: Implement a mechanism for storing items in storeman.
