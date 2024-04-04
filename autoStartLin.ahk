@@ -12,6 +12,7 @@ global LIN_CONFIRM_CHAR_PATH := LoadConfig("LIN_CONFIRM_CHAR_PATH", A_ScriptDir 
 global LIN_CHANGE_ROLE_PATH := LoadConfig("LIN_CHANGE_ROLE_PATH", A_ScriptDir "\config.txt") ; 點重新登入
 global LIN_EXIT_PATH := LoadConfig("LIN_EXIT_PATH", A_ScriptDir "\config.txt") ; 點離開
 global LIN_ACCOUNT_PATH := LoadConfig("LIN_ACCOUNT_PATH", A_ScriptDir "\config.txt") ; 執行的帳號
+global LIN_ACCOUNT_LIST_PATH := LoadConfig("LIN_ACCOUNT_LIST_PATH", A_ScriptDir "\config.txt") ; 所有帳號存放區
 global LIN_BAG_PATH := LoadConfig("LIN_BAG_PATH", A_ScriptDir "\config.txt") ; bag
 global LIN_STORE_ITEMS_PATH := LoadConfig("LIN_STORE_ITEMS_PATH", A_ScriptDir "\config.txt") ; sell 
 global LIN_STORE_TEXT_PATH := LoadConfig("LIN_STORE_TEXT_PATH", A_ScriptDir "\config.txt") ; click
@@ -42,6 +43,12 @@ Return
 ; 開袋子用, 上面所有的帳號角色都會跑過一變
 ::cmd2::
 !Pause::
+StartAccount(true, false)
+Return
+
+; 開袋子用+存入倉庫
+::cmd3::
+!PgUp::
 StartAccount(true, true)
 Return
 
@@ -49,18 +56,26 @@ Return
 StoreProcess()
 Return
 
+; 自動開啟天堂
 StartAccount(isOpenBag, isStoreMode){
     TODAY := A_YYYY A_MM A_DD
     openBagMode := isOpenBag
     WriteLog("Open Bag Mode: " openBagMode )
     WriteLog("Store Mode: " isStoreMode )
     accounts := ReadAccounts(LIN_ACCOUNT_PATH)
-    totalAccountNum := accounts.Length()
 
     if (isOpenBag = false)
     {
         totalAccountNum = 1
     }
+    Else
+    {
+        ; 複製帳號清單到執行資料夾內
+        CopyAccountToExec()
+        accounts := ReadAccounts(LIN_ACCOUNT_PATH)
+        totalAccountNum := accounts.Length()
+    }
+    
 
     accountIndex := 0
     Loop %totalAccountNum%
@@ -200,6 +215,7 @@ StartAccount(isOpenBag, isStoreMode){
     WriteLog("Process End")
 }
 
+; 自動存入倉庫
 StoreProcess()
 {
     ; talk to storeman
@@ -262,6 +278,34 @@ StoreProcess()
         WriteLog("Save success")
     sleep 1000
 }
+
+CopyAccountToExec()
+{
+    global LIN_ACCOUNT_PATH  
+    
+    SourceFolder := LoadConfig("LIN_ACCOUNT_LIST_PATH", A_ScriptDir "\config.txt") 
+
+    If (FileExist(SourceFolder))
+    {
+        Loop, %SourceFolder%\*.txt
+        {
+            FileName := A_LoopFileName
+            FileCopy, % SourceFolder "\" FileName, % LIN_ACCOUNT_PATH "\" FileName, 1
+            If (ErrorLevel != 0)
+            {
+                WriteLog(FileName "copy to " SourceFolder " failed")
+            }
+        }
+    }
+    Else
+    {
+        WriteLog(SourceFolder "Not Exists")
+    }
+    Return
+}
+
+
+
 
 !numpad0::
 Send, /bookmark \fY[其他] 袋子
