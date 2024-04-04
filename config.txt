@@ -1,2 +1,4 @@
 LIN_START_PATH := C:\pic\start.PNG
 LIN_PROG_PATH := C:\Program Files\Gamania\悠風(Lineage 3.5C)\Login.exe
+LIN_ACCOUNT_LIST_PATH := D:\AhkAutoLogIn\roles_account
+LIN_ACCOUNT_PATH := D:\AhkAutoLogIn\execute_account
