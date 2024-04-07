@@ -281,27 +281,30 @@ StoreProcess()
 
 CopyAccountToExec()
 {
-    global LIN_ACCOUNT_PATH  
-    
-    SourceFolder := LoadConfig("LIN_ACCOUNT_LIST_PATH", A_ScriptDir "\config.txt") 
+    MsgBox, 4,, Do you want to start copy files process?
 
-    If (FileExist(SourceFolder))
+    ifMsgBox Yes
     {
-        Loop, %SourceFolder%\*.txt
+        global LIN_ACCOUNT_PATH  
+        SourceFolder := LoadConfig("LIN_ACCOUNT_LIST_PATH", A_ScriptDir "\config.txt") 
+        If (FileExist(SourceFolder))
         {
-            FileName := A_LoopFileName
-            FileCopy, % SourceFolder "\" FileName, % LIN_ACCOUNT_PATH "\" FileName, 1
-            If (ErrorLevel != 0)
+            Loop, %SourceFolder%\*.txt
             {
-                WriteLog(FileName "copy to " SourceFolder " failed")
+                FileName := A_LoopFileName
+                FileCopy, % SourceFolder "\" FileName, % LIN_ACCOUNT_PATH "\" FileName, 1
+                If (ErrorLevel != 0)
+                {
+                    WriteLog(FileName "copy to " SourceFolder " failed")
+                }
             }
         }
+        Else
+        {
+            WriteLog(SourceFolder "Not Exists")
+        }
     }
-    Else
-    {
-        WriteLog(SourceFolder "Not Exists")
-    }
-    Return
+    return
 }
 
 
