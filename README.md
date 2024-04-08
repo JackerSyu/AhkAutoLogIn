@@ -34,6 +34,7 @@ Include:
 
 
 ## Update History
-
+- 2024-04-07 Add features: Confirm Msgbox selecting copy files to exec folder or not
+- 2024-04-04 Add features: Copy files to execute folder after starting the process
 - 2024-03-27 Add features: Move to specific folder after finishing the process.
 - 2024-03-25 Add features: Implement a mechanism for storing items in storeman.
