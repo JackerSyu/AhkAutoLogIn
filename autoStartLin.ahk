@@ -14,12 +14,20 @@ global LIN_EXIT_PATH := LoadConfig("LIN_EXIT_PATH", A_ScriptDir "\config.txt") ;
 global LIN_ACCOUNT_PATH := LoadConfig("LIN_ACCOUNT_PATH", A_ScriptDir "\config.txt") ; 執行的帳號
 global LIN_ACCOUNT_LIST_PATH := LoadConfig("LIN_ACCOUNT_LIST_PATH", A_ScriptDir "\config.txt") ; 所有帳號存放區
 global LIN_BAG_PATH := LoadConfig("LIN_BAG_PATH", A_ScriptDir "\config.txt") ; bag
+global LIN_TELEPORT_SCROLL_PATH := LoadConfig("LIN_TELEPORT_SCROLL_PATH", A_ScriptDir "\config.txt") ; blessed teleport scroll
 global LIN_STORE_ITEMS_PATH := LoadConfig("LIN_STORE_ITEMS_PATH", A_ScriptDir "\config.txt") ; sell 
+global LIN_GET_ITEMS_PATH := LoadConfig("LIN_GET_ITEMS_PATH", A_ScriptDir "\config.txt") ; get
 global LIN_STORE_TEXT_PATH := LoadConfig("LIN_STORE_TEXT_PATH", A_ScriptDir "\config.txt") ; click
 global LIN_STORE_TEXT2_PATH := LoadConfig("LIN_STORE_TEXT2_PATH", A_ScriptDir "\config.txt") ; click
+global LIN_STORE_TEXT3_PATH := LoadConfig("LIN_STORE_TEXT3_PATH", A_ScriptDir "\config.txt") ; click
 global LIN_STORE_CONFIRM_PATH := LoadConfig("LIN_STORE_CONFIRM_PATH", A_ScriptDir "\config.txt") ; save
 global LIN_LACK_BAG_ACCOUNT_PATH := LoadConfig("LIN_LACK_BAG_ACCOUNT_PATH", A_ScriptDir "\config.txt") ; need buy bag
 global LIN_ACCOUNT_DONE_SUCCESS_PATH := LoadConfig("LIN_ACCOUNT_DONE_SUCCESS_PATH", A_ScriptDir "\config.txt") ; success
+global LIN_DEST_BAGMAN_PATH := LoadConfig("LIN_DEST_BAGMAN_PATH", A_ScriptDir "\config.txt") ; teleport to bagman
+global LIN_DEST_BAGMAN2_PATH := LoadConfig("LIN_DEST_BAGMAN2_PATH", A_ScriptDir "\config.txt") ; teleport to bagman
+global LIN_DEST_OUREA_PATH := LoadConfig("LIN_DEST_OUREA_PATH", A_ScriptDir "\config.txt") ; teleport to ourea
+global LIN_DEST_OUREA2_PATH := LoadConfig("LIN_DEST_OUREA2_PATH", A_ScriptDir "\config.txt") ; teleport to ourea
+global LIN_BUY_BAG_PATH := LoadConfig("LIN_BUY_BAG_PATH", A_ScriptDir "\config.txt") ; buybag
 
 ; 選角色的坐標
 global ROLE_1_POS = [103, 188]
@@ -51,6 +59,22 @@ Return
 !PgUp::
 StartAccount(true, true)
 Return
+
+::cmdtest::
+BuyBagProcess(false)
+return
+
+::cmdtel::
+teleportProcess(1)
+return
+
+::cmdbuy::
+BuyBagProcess(false)
+teleportProcess(1)
+talkToBagmanProcess()
+teleportProcess(2)
+talkToTeleportWoman()
+return
 
 !numpad7::
 StoreProcess()
@@ -277,6 +301,200 @@ StoreProcess()
     Else
         WriteLog("Save success")
     sleep 1000
+}
+
+; 自動購買袋子 
+BuyBagProcess(hasBag)
+{
+    WriteLog("The charactor has found Bag:" hasBag)
+    if(hasBag)
+    {
+        return
+    }
+        
+    ; talk to storeman (get adena and blessed scroll of teleportation)
+     ; talk to storeman
+    Send, {esc} {esc} {esc}
+    WriteLog("click storeman")
+    JierPos_X := 443
+    JierPos_Y := 196
+    ; move to storeman
+    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    sleep 500
+    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    sleep 500
+    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    
+    sleep 3000
+    MouseMove, 100, 200, 0 
+    Loop 7 
+    {
+        send, {WheelDown}
+    }
+    ; click store
+    sleep 500
+    if(!ClickPicture(LIN_STORE_TEXT_PATH, 1, 1,true,false)) ; cannot bypass
+        Return
+    sleep 500
+    if(!ClickPicture(LIN_STORE_TEXT3_PATH, 1, 1,true,false)) ; cannot bypass
+        Return
+    Images := ReadPic(LIN_GET_ITEMS_PATH)
+    scrollCount := 0
+    MouseClick,left,109,164,1
+    MouseMove, 109,164,1
+    sleep 500
+    Loop {
+        found := false  
+        for index, imagePath in Images {
+            if (ClickPicture(imagePath, 1, 1, true, false)) {
+                sleep, 200
+                send, {Ctrl Up} 
+                if(index = 1)
+                    send, {1} {0} {0} {0} {0} {0}
+                else 
+                    send, {2}
+                found := true  
+                WriteLog("found:" found)
+            }
+        }
+        if (found = false) {
+            
+            Loop 7 {
+                send, {WheelDown}
+                scrollCount++
+                
+            }
+	    sleep, 100
+        }
+        if (scrollCount >= 70)
+            break
+    }
+    sleep 1500
+    ; save btn 
+    if(!ClickPicture(LIN_STORE_CONFIRM_PATH, 1, 1,true,true)) ; cannot bypass
+        Return
+    Else
+        WriteLog("get adena and teleport scroll success")
+    sleep 1000
+    ; teleport to bagman
+    WriteLog("start to teleport process..")
+    ; teleportProcess(1)
+    ; talk to bagman
+    ; teleport to orea
+    ; walk back to storeman
+}
+
+teleportProcess(destination)
+{
+    ; @destination => 1=bagman, 2=ourea
+    dest := ""
+    if(destination = 1)
+        dest := "bagman"
+    else if(destination = 2)
+        dest := "ourea"
+    WriteLog("Dest:" dest)
+    ; if(!ClickPicture(LIN_TELEPORT_SCROLL_PATH, 1, 1, true, false)) 
+    ; {
+    ;     WriteLog("cannot find teleport scroll")
+    ;     return
+    ; }
+    sleep 500
+    send, {F10}
+    sleep 1000
+    if(destination = 1)
+    {
+        getPosSuccess := false
+        pos := GetPicturePosition(LIN_DEST_BAGMAN_PATH)
+        if %pos% 
+            getPosSuccess := true
+        if (getPosSuccess = false)
+            pos := GetPicturePosition(LIN_DEST_BAGMAN2_PATH)
+    }
+
+    if(destination = 2)
+    {
+        getPosSuccess := false
+        pos := GetPicturePosition(LIN_DEST_OUREA_PATH)
+        if %pos% 
+            getPosSuccess := true
+        if (getPosSuccess = false)
+            pos := GetPicturePosition(LIN_DEST_OUREA2_PATH)
+    }
+
+    if %pos%{
+        posX:=pos[1]
+        posY:=pos[2]    
+        MouseClick,left,%posX%,%posY%,1
+        sleep 200
+        MouseClick,left,%posX%,%posY%,1
+        sleep 200
+        MouseClick,left,%posX%,%posY%,1
+        sleep 200
+    }
+    Else
+    {
+        WriteLog("cannot find dest:" dest)
+        return
+    }
+}
+
+talkToBagmanProcess()
+{
+    send, {esc} {esc}
+    WriteLog("click bagman")
+    BagmanPos_X := 443
+    BagmanPos_Y := 196
+    ; move to storeman
+    MouseClick,left,%BagmanPos_X%,%BagmanPos_Y%,1
+    sleep 500
+    MouseClick,left,%BagmanPos_X%,%BagmanPos_Y%,1
+    sleep 500
+    MouseClick,left,%BagmanPos_X%,%BagmanPos_Y%,1
+    sleep 1000
+    ; click store
+    sleep 500
+    Page_1_Pos_X := 78
+    Page_1_Pos_Y := 231
+    MouseClick,left,%Page_1_Pos_X%,%Page_1_Pos_Y%,1
+    sleep 500
+    MouseMove, 100, 200, 0 
+    sleep 500
+    Loop 5
+    {
+        send, {WheelDown}
+    }
+    sleep 500
+    if(!ClickPicture(LIN_BUY_BAG_PATH, 1, 1,true,false)) ; cannot bypass
+    {
+        WriteLog("cannot find" LIN_BUY_BAG_PATH)
+        Return
+    }
+        
+    sleep 200
+    send, {esc} {esc}
+}
+
+talkToTeleportWoman()
+{
+    TeleportWomanPos_X := 389
+    TeleportWomanPos_Y := 153
+    MouseClick,left,%TeleportWomanPos_X%,%TeleportWomanPos_Y%,1
+    sleep 500
+    TeleportPos_Page1_X := 61
+    TeleportPos_Page1_Y := 134
+    MouseClick,left,%TeleportPos_Page1_X%,%TeleportPos_Page1_Y%,1
+    sleep 300
+    TeleportPos_Page2_X := 77
+    TeleportPos_Page2_Y := 180
+    MouseClick,left,%TeleportPos_Page2_X%,%TeleportPos_Page2_Y%,1
+    sleep 500
+    JierPos_X := 581
+    JierPos_Y := 262
+    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    sleep 100
+    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    sleep 3000
+    send, {esc}
 }
 
 CopyAccountToExec()
