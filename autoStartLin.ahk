@@ -14,6 +14,7 @@ global LIN_EXIT_PATH := LoadConfig("LIN_EXIT_PATH", A_ScriptDir "\config.txt") ;
 global LIN_ACCOUNT_PATH := LoadConfig("LIN_ACCOUNT_PATH", A_ScriptDir "\config.txt") ; 執行的帳號
 global LIN_ACCOUNT_LIST_PATH := LoadConfig("LIN_ACCOUNT_LIST_PATH", A_ScriptDir "\config.txt") ; 所有帳號存放區
 global LIN_BAG_PATH := LoadConfig("LIN_BAG_PATH", A_ScriptDir "\config.txt") ; bag
+global LIN_BAG_ITEM_PATH := LoadConfig("LIN_BAG_ITEM_PATH", A_ScriptDir "\config.txt") ; bag
 global LIN_TELEPORT_SCROLL_PATH := LoadConfig("LIN_TELEPORT_SCROLL_PATH", A_ScriptDir "\config.txt") ; blessed teleport scroll
 global LIN_STORE_ITEMS_PATH := LoadConfig("LIN_STORE_ITEMS_PATH", A_ScriptDir "\config.txt") ; sell 
 global LIN_GET_ITEMS_PATH := LoadConfig("LIN_GET_ITEMS_PATH", A_ScriptDir "\config.txt") ; get
@@ -45,27 +46,44 @@ global ROLES_POS := [ROLE_1_POS, ROLE_2_POS, ROLE_3_POS, ROLE_4_POS]
 ; 只開啟第一個帳號 第一個角色
 ::cmd1::
 Pause::
-StartAccount(false, false)
+StartAccount(false, false, false)
 Return
 
 ; 開袋子用, 上面所有的帳號角色都會跑過一變
 ::cmd2::
 !Pause::
-StartAccount(true, false)
+StartAccount(true, false, false)
 Return
 
 ; 開袋子用+存入倉庫
 ::cmd3::
 !PgUp::
-StartAccount(true, true)
+StartAccount(true, true, false)
 Return
+
+; 開袋子用+存入倉庫
+::cmd4::
+!PgDn::
+StartAccount(true, false, true)
+Return
+
+
+
 
 ::cmdtest::
 BuyBagProcess(false)
 return
 
-::cmdtel::
+::cmdtel1::
 teleportProcess(1)
+return
+
+::cmdtel2::
+teleportProcess(2)
+return
+
+::cmdbagman::
+talkToBagmanProcess()
 return
 
 ::cmdbuy::
@@ -81,7 +99,7 @@ StoreProcess()
 Return
 
 ; 自動開啟天堂
-StartAccount(isOpenBag, isStoreMode){
+StartAccount(isOpenBag, isStoreMode, isBuyMode){
     TODAY := A_YYYY A_MM A_DD
     openBagMode := isOpenBag
     WriteLog("Open Bag Mode: " openBagMode )
@@ -171,6 +189,30 @@ StartAccount(isOpenBag, isStoreMode){
                     accountComplete := false
                     hasBag := false
                 }   
+
+                if(isBuyMode == true)
+                {
+                    if(!hasBag)
+                    {
+                        BuyBagProcess(hasBag)
+                        teleportProcess(1)
+                        talkToBagmanProcess()
+                        teleportProcess(2)
+                        talkToTeleportWoman()
+
+                        if(!ClickPicture(LIN_BAG_PATH, 1, 1, true, false)) ; can bypass
+                        {
+                            accountComplete := false
+                            hasBag := false
+                        }
+                        Else
+                        {
+                            accountComplete := true
+                            hasBag := true
+                        }
+                    }
+                }
+
                 ; 袋子放在F9, 如果要開寶箱可以自己新增多個熱鍵, 按多次一點
                 send {F9}
                 sleep 2000
@@ -289,7 +331,7 @@ StoreProcess()
                 scrollCount++
                 
             }
-	    sleep, 100
+        sleep, 100
         }
         if (scrollCount >= 70)
             break
@@ -309,11 +351,11 @@ BuyBagProcess(hasBag)
     WriteLog("The charactor has found Bag:" hasBag)
     if(hasBag)
     {
-        return
+        return 
     }
         
     ; talk to storeman (get adena and blessed scroll of teleportation)
-     ; talk to storeman
+    ; talk to storeman
     Send, {esc} {esc} {esc}
     WriteLog("click storeman")
     JierPos_X := 443
@@ -364,7 +406,7 @@ BuyBagProcess(hasBag)
                 scrollCount++
                 
             }
-	    sleep, 100
+        sleep, 100
         }
         if (scrollCount >= 70)
             break
@@ -393,69 +435,116 @@ teleportProcess(destination)
     else if(destination = 2)
         dest := "ourea"
     WriteLog("Dest:" dest)
-    ; if(!ClickPicture(LIN_TELEPORT_SCROLL_PATH, 1, 1, true, false)) 
-    ; {
-    ;     WriteLog("cannot find teleport scroll")
-    ;     return
-    ; }
-    sleep 500
-    send, {F10}
+  
+    send, {esc}
+    sleep 100
+    send, {Tab}
     sleep 1000
+    MouseMove, 715,126,1
+    sleep 100
+    ; scroll to top 
+    Loop 40 {
+        send, {WheelUp}
+    }
+    sleep 500
+    ; looking for the scroll teleport
+    Loop {
+        found := false  
+        sleep 100
+        pos_teleport := GetPicturePosition(LIN_TELEPORT_SCROLL_PATH)
+
+        if %pos_teleport% {
+            posX:=pos_teleport[1]
+            posY:=pos_teleport[2]  
+            MouseClick,left,%posX%,%posY%,1
+            sleep 200
+            MouseClick,left,%posX%,%posY%,1
+            sleep 200
+            MouseClick,left,%posX%,%posY%,1
+            sleep 800
+            found := true  
+
+            ; MouseMove, %posX%,%posY%, 10
+            ; sleep 200
+            ; Send {LButton DOWN}
+            ; sleep 800
+            ; MouseMove, 707,540, 10
+            ; sleep 800
+            ; Send {LButton UP}
+
+            ; ;防止沒放到
+            ; MouseMove, %posX%,%posY%, 10
+            ; sleep 200
+            ; Send {LButton DOWN}
+            ; sleep 800
+            ; MouseMove, 707,540, 10
+            ; sleep 800
+            ; Send {LButton UP}
+            
+        }
+
+        if (found == 0) {
+            Loop 7 {
+                send, {WheelDown}
+                scrollCount++
+            }
+            sleep, 100
+        }
+        Else ; if found break;
+            break
+
+        if (scrollCount >= 70)
+        {
+            if(found == 0)
+            {
+                WriteLog("Cannot find the teleport scroll in item bag..")
+                return false
+            }
+            break
+        }
+            
+    }
+    sleep 1000
+
+    posToX := 0
+    posToY := 0
+
     if(destination = 1)
     {
-        getPosSuccess := false
-        pos := GetPicturePosition(LIN_DEST_BAGMAN_PATH)
-        if %pos% 
-            getPosSuccess := true
-        if (getPosSuccess = false)
-            pos := GetPicturePosition(LIN_DEST_BAGMAN2_PATH)
+        posToX := 66
+        posToY := 64
     }
 
     if(destination = 2)
     {
-        getPosSuccess := false
-        pos := GetPicturePosition(LIN_DEST_OUREA_PATH)
-        if %pos% 
-            getPosSuccess := true
-        if (getPosSuccess = false)
-            pos := GetPicturePosition(LIN_DEST_OUREA2_PATH)
+        posToX := 64
+        posToY := 51
     }
 
-    if %pos%{
-        posX:=pos[1]
-        posY:=pos[2]    
-        MouseClick,left,%posX%,%posY%,1
-        sleep 200
-        MouseClick,left,%posX%,%posY%,1
-        sleep 200
-        MouseClick,left,%posX%,%posY%,1
-        sleep 200
-    }
-    Else
-    {
-        WriteLog("cannot find dest:" dest)
-        return
-    }
+    ClickPosition(posToX, posToY)
+    sleep 200
+    ClickPosition(posToX, posToY)
 }
 
 talkToBagmanProcess()
 {
     send, {esc} {esc}
     WriteLog("click bagman")
-    BagmanPos_X := 443
-    BagmanPos_Y := 196
+    sleep 500
+    BagmanPos_X := 426
+    BagmanPos_Y := 153
     ; move to storeman
-    MouseClick,left,%BagmanPos_X%,%BagmanPos_Y%,1
+    ClickPosition(BagmanPos_X, BagmanPos_Y)
     sleep 500
-    MouseClick,left,%BagmanPos_X%,%BagmanPos_Y%,1
+    ClickPosition(BagmanPos_X, BagmanPos_Y)
     sleep 500
-    MouseClick,left,%BagmanPos_X%,%BagmanPos_Y%,1
+    ClickPosition(BagmanPos_X, BagmanPos_Y)
     sleep 1000
     ; click store
     sleep 500
     Page_1_Pos_X := 78
     Page_1_Pos_Y := 231
-    MouseClick,left,%Page_1_Pos_X%,%Page_1_Pos_Y%,1
+    ClickPosition(Page_1_Pos_X, Page_1_Pos_Y)
     sleep 500
     MouseMove, 100, 200, 0 
     sleep 500
@@ -472,27 +561,100 @@ talkToBagmanProcess()
         
     sleep 200
     send, {esc} {esc}
+
+     sleep 500
+    MouseMove, 715,126,1
+    sleep 100
+    send, {tab}
+
+    Loop 40 {
+        send, {WheelUp}
+    }
+
+    ; looking for the bag
+    Loop {
+        found := false  
+        sleep 100
+        pos_bag := GetPicturePosition(LIN_BAG_ITEM_PATH)
+
+        if %pos_bag% {
+            posX:=pos_bag[1]
+            posY:=pos_bag[2]  
+            MouseClick,left,%posX%,%posY%,1
+            sleep 200
+            MouseClick,left,%posX%,%posY%,1
+            sleep 200
+            MouseClick,left,%posX%,%posY%,1
+            sleep 800
+            found := true  
+
+            MouseMove, %posX%,%posY%, 10
+            sleep 200
+            Send {LButton DOWN}
+            sleep 800
+            MouseMove, 673,548, 10
+            sleep 800
+            Send {LButton UP}
+
+            ;防止沒放到
+            MouseMove, %posX%,%posY%, 10
+            sleep 200
+            Send {LButton DOWN}
+            sleep 800
+            MouseMove, 673,548, 10
+            sleep 800
+            Send {LButton UP}
+        }
+
+        if (found == 0) {
+            Loop 7 {
+                send, {WheelDown}
+                scrollCount++
+            }
+            sleep, 100
+        }
+        Else ; if found break;
+            break
+
+        if (scrollCount >= 70)
+        {
+            if(found == 0)
+            {
+                WriteLog("Cannot find the bag in item bag..")
+                return false
+            }
+            break
+        }
+            
+    }
+
+    sleep 200
+    send, {esc} {esc}
+
 }
 
 talkToTeleportWoman()
 {
-    TeleportWomanPos_X := 389
-    TeleportWomanPos_Y := 153
-    MouseClick,left,%TeleportWomanPos_X%,%TeleportWomanPos_Y%,1
     sleep 500
+    
+    TeleportWomanPos_X := 385
+    TeleportWomanPos_Y := 77
+    ClickPosition(TeleportWomanPos_X, TeleportWomanPos_Y)
+    sleep 1000
     TeleportPos_Page1_X := 61
     TeleportPos_Page1_Y := 134
-    MouseClick,left,%TeleportPos_Page1_X%,%TeleportPos_Page1_Y%,1
+
+    ClickPosition(TeleportPos_Page1_X, TeleportPos_Page1_Y)
     sleep 300
     TeleportPos_Page2_X := 77
     TeleportPos_Page2_Y := 180
-    MouseClick,left,%TeleportPos_Page2_X%,%TeleportPos_Page2_Y%,1
+    ClickPosition(TeleportPos_Page2_X, TeleportPos_Page2_Y)
     sleep 500
     JierPos_X := 581
     JierPos_Y := 262
-    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    ClickPosition(JierPos_X, JierPos_Y)
     sleep 100
-    MouseClick,left,%JierPos_X%,%JierPos_Y%,1
+    ClickPosition(JierPos_X, JierPos_Y)
     sleep 3000
     send, {esc}
 }
